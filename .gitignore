@@ -1,0 +1,6 @@
+# Ignore dataset files (too large for GitHub)
+data/*
+!data/README.md
+
+# Ignore Jupyter checkpoints
+**/.ipynb_checkpoints/
