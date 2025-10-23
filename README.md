@@ -9,6 +9,8 @@ from exploratory data analysis all the way to training a tuned model with **earl
 ## Dataset
 
 The dataset used is the well-known **Kaggle House Prices - Advanced Regression Techniques** dataset (`train.csv` and `test.csv`).  
+🔗 **Source:** [Kaggle - House Prices: Advanced Regression Techniques](https://www.kaggle.com/c/house-prices-advanced-regression-techniques)
+
 It contains a wide range of numeric and categorical features describing residential homes in Ames, Iowa.
 
 - **Train set**: 1,460 rows × 81 columns (including `SalePrice`)  
