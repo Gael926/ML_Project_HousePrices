@@ -1,28 +1,44 @@
-# 🏠 House Prices Prediction
+# House Prices Prediction
 
-Predicting house prices is a classic regression challenge.  
-This project was an opportunity for me to build a complete **end-to-end regression pipeline**,  
-from exploratory data analysis all the way to training a tuned model with **early stopping** for optimal performance.
+Predicting house prices is a classic regression challenge.
+This project demonstrates a complete **end-to-end regression pipeline**, from exploratory data analysis to training a tuned model with **early stopping** for optimal performance.
 
 ---
 
 ## Dataset
 
-The dataset used is the well-known **Kaggle House Prices - Advanced Regression Techniques** dataset (`train.csv` and `test.csv`).  
+The dataset used is the well-known **Kaggle House Prices - Advanced Regression Techniques** dataset (`train.csv` and `test.csv`).
+🔗 **Source:** [Kaggle - House Prices: Advanced Regression Techniques](https://www.kaggle.com/c/house-prices-advanced-regression-techniques)
+
 It contains a wide range of numeric and categorical features describing residential homes in Ames, Iowa.
 
-- **Train set**: 1,460 rows × 81 columns (including `SalePrice`)  
-- **Test set**: 1,459 rows × 80 columns (without `SalePrice`)  
+- **Train set**: 1,460 rows x 81 columns (including `SalePrice`)
+- **Test set**: 1,459 rows x 80 columns (without `SalePrice`)
 - **Target**: `SalePrice` (the house sale price in USD)
 
 ---
 
-## 📊 Step 1 - Exploratory Data Analysis (EDA)
+## Project Structure
+
+The project has been refactored from a monolithic notebook into a modular Python pipeline found in the `src/` directory.
+
+- `src/config.py`: Configuration constants (paths, random state).
+- `src/data_loader.py`: Functions to load train and test data.
+- `src/preprocessing.py`: Data cleaning, missing value imputation, feature engineering, and transformation pipelines.
+- `src/training.py`: Model training logic, including Linear Regression, Random Forest, and XGBoost (with manual early stopping loop).
+- `src/evaluation.py`: regression metrics calculation and logging.
+- `main.py`: The entry point script that orchestrates the entire pipeline.
+
+---
+
+
+
+## Step 1 - Exploratory Data Analysis (EDA)
 
 The first step was to explore and understand the dataset:
 
-- The target variable `SalePrice` is **right-skewed** (skewness ≈ 1.88).  
-- Some columns contain **many missing values**, especially `PoolQC`, `Alley`, `Fence`, and `MiscFeature`.  
+- The target variable `SalePrice` is **right-skewed** (skewness ~ 1.88).
+- Some columns contain **many missing values**, especially `PoolQC`, `Alley`, `Fence`, and `MiscFeature`.
 - Key numerical features such as `OverallQual`, `GrLivArea`, and `GarageCars` show strong positive correlations with `SalePrice`.
 
 **Target distribution**
@@ -43,15 +59,15 @@ The first step was to explore and understand the dataset:
 
 ---
 
-## ⚙️ Step 2 - Preprocessing
+## Step 2 - Preprocessing
 
-The preprocessing workflow included several important steps:
+The preprocessing workflow included several important steps, implemented in `src/preprocessing.py`:
 
-- Dropped columns with **excessive missingness** (`PoolQC`, `MiscFeature`, `Alley`, `Fence`).  
-- Applied **median imputation** for numerical features and **most frequent imputation** for categorical ones.  
-- Encoded categorical variables using **One-Hot Encoding**.  
-- Scaled numerical features with **StandardScaler**.  
-- Built a single **ColumnTransformer** to unify preprocessing and prevent data leakage.  
+- Dropped columns with **excessive missingness** or imputed them appropriately.
+- Applied **median imputation** for numerical features and **most frequent imputation** for categorical ones.
+- Encoded categorical variables using **One-Hot Encoding**.
+- Scaled numerical features with **StandardScaler**.
+- Built a single **ColumnTransformer** to unify preprocessing and prevent data leakage.
 - Applied a **log transformation** on the target (`np.log1p(SalePrice)`) to normalize it.
 
 **Original vs log-transformed target**
@@ -62,32 +78,32 @@ After preprocessing, the dataset expanded from **75 to 274 columns** due to one-
 
 ---
 
-## 🤖 Step 3 - Models and Training
+## Step 3 - Models and Training
 
 I compared several regression models to find the best performing one.
 
-### 1️⃣ Linear Regression (Baseline)
+### 1. Linear Regression (Baseline)
 
-A simple baseline model trained on the preprocessed data.  
+A simple baseline model trained on the preprocessed data.
 Despite its simplicity, it achieved strong performance due to the linear nature of many features.
 
 ---
 
-### 2️⃣ Random Forest
+### 2. Random Forest
 
-- Tested both baseline and **RandomizedSearchCV** versions.  
-- Tuned hyperparameters such as `n_estimators`, `max_depth`, and `min_samples_split`.  
+- Tested both baseline and **RandomizedSearchCV** versions.
+- Tuned hyperparameters such as `n_estimators`, `max_depth`, and `min_samples_split`.
 - Results showed slightly lower accuracy than Linear Regression, indicating potential overfitting and limited benefit for this dataset.
 
 ---
 
-### 3️⃣ XGBoost (Final Model)
+### 3. XGBoost (Final Model)
 
-The **XGBoost Regressor** was the final and best-performing model.  
+The **XGBoost Regressor** was the final and best-performing model.
 It was optimized in two stages:
 
-1. **RandomizedSearchCV** for broad exploration  
-2. **GridSearchCV** for fine-tuning around the best parameters  
+1. **RandomizedSearchCV** for broad exploration
+2. **GridSearchCV** for fine-tuning around the best parameters
 
 **Final optimal parameters:**
 ```yaml
@@ -104,8 +120,8 @@ reg_lambda: 0.65
 
 Training used a validation split and **early stopping**:
 
-- `num_boost_round=1000`  
-- `early_stopping_rounds=50`  
+- `num_boost_round=1000`
+- `early_stopping_rounds=50`
 - Best iteration: **374**
 
 **Early stopping curve (train vs validation RMSE)**
@@ -114,11 +130,11 @@ Training used a validation split and **early stopping**:
 
 ---
 
-## ✅ Step 4 - Evaluation and Results
+## Step 4 - Evaluation and Results
 
-I evaluated all models using RMSE, MAE, MedianAE, MAPE, and R² on the test set.
+I evaluated all models using RMSE, MAE, MedianAE, MAPE, and R2 on the test set.
 
-| Model | RMSE | MAE | MedAE | MAPE | R² |
+| Model | RMSE | MAE | MedAE | MAPE | R2 |
 |---|---:|---:|---:|---:|---:|
 | Linear Regression | 0.1289 | 0.0896 | 0.0602 | 0.75% | 0.9109 |
 | Random Forest (Baseline) | 0.1448 | 0.0982 | 0.0665 | 0.83% | 0.8877 |
@@ -126,16 +142,16 @@ I evaluated all models using RMSE, MAE, MedianAE, MAPE, and R² on the test set.
 | XGBoost (Baseline) | 0.1480 | 0.0961 | 0.0642 | 0.81% | 0.8826 |
 | **XGBoost (Final)** | **0.1269** | **0.0856** | **0.0605** | **0.72%** | **0.9137** |
 
-The **final XGBoost model** achieved the lowest error and highest R², outperforming both Random Forest and Linear Regression.
+The **final XGBoost model** achieved the lowest error and highest R2, outperforming both Random Forest and Linear Regression.
 
 ---
 
-## 🏆 Step 5 - Final Model: XGBoost with Early Stopping
+## Step 5 - Final Model: XGBoost with Early Stopping
 
 The final model used **early stopping** to avoid overfitting:
 
-- **Best iteration**: 374  
-- **Best RMSE (validation)**: 0.1245  
+- **Best iteration**: 374
+- **Best RMSE (validation)**: 0.1245
 
 The validation curve showed smooth convergence, with the validation RMSE stabilizing after ~370 rounds.
 
@@ -143,7 +159,7 @@ This confirms that early stopping helped the model generalize efficiently withou
 
 ---
 
-## 💾 Step 6 - Using the Model
+## Step 6 - Using the Model
 
 The final pipeline was exported using `joblib`:
 
@@ -171,18 +187,42 @@ y_pred = np.expm1(y_log_pred)
 
 ---
 
-## 📝 Conclusion
+## Installation and Usage
+
+To reproduce the results or train the model:
+
+1. Install dependencies:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. Run the automated pipeline: This script loads data, trains all models (using modular code in `src/`), and saves the final XGBoost model.
+
+   ```bash
+   python main.py
+   ```
+
+3. Explore via Notebook: You can also run the original comprehensive notebook for a step-by-step analysis:
+
+   ```bash
+   jupyter notebook notebooks/house_prices_regression.ipynb
+   ```
+
+---
+
+## Conclusion
 
 This project demonstrated how to handle a **complex regression dataset** through a complete ML workflow:
 
-1. In-depth exploratory data analysis  
-2. Feature preprocessing with pipelines  
-3. Comparison of multiple models  
-4. Hyperparameter tuning  
-5. Early stopping for regularization  
+1. In-depth exploratory data analysis
+2. Feature preprocessing with pipelines
+3. Comparison of multiple models
+4. Hyperparameter tuning
+5. Early stopping for regularization
 
-The final **XGBoost model** achieved an **RMSE of 0.1269** and **R² of 0.9137**,  
+The final **XGBoost model** achieved an **RMSE of 0.1269** and **R2 of 0.9137**,
 successfully capturing non-linear patterns while maintaining strong generalization.
 
-By combining good preprocessing, thoughtful model tuning, and early stopping,  
+By combining good preprocessing, thoughtful model tuning, and early stopping,
 the project achieved a **robust and interpretable solution** for **house price prediction**.
